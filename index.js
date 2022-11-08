@@ -58,6 +58,23 @@ async function run() {
         //     res.send(service)
         //  })
 
+
+         //service  api for post 
+
+        app.post('/services', async (req, res) => {
+            const services = req.body;
+            const result = await serviceCollection.insertOne(services);
+            res.send(result);
+
+       })
+    //     app.post('/allservices', async (req, res) => {
+    //         const services = req.body;
+    //         const result = await serviceCollection.insertOne(services);
+    //         res.send(result);
+
+    //    })
+
+
           //review api for get
         app.get('/review', async (req, res) => {
      
