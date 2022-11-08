@@ -29,7 +29,7 @@ async function run() {
         //data get for 3 services
         app.get('/services', async (req, res) => {
         const query = {}
-        const cursor = serviceCollection.find(query);
+        const cursor = serviceCollection.find(query).sort({ $natural: -1 });
         const services = await cursor.limit(3).toArray();
         res.send(services);
         });
@@ -84,7 +84,7 @@ async function run() {
                     email:req.query.eamil
                 }
             }
-            const cursor = reviewCollection.find(query);
+            const cursor = reviewCollection.find(query).sort({ $natural: -1 });
             const review = await cursor.toArray();
             res.send(review)
         })
