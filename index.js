@@ -91,8 +91,33 @@ async function run() {
             res.send(result);
         })
 
-        //update
+ // update data load
+        app.get('/review/:id', async (req, res) => {
+              const id = req.params.id;
+            const query={_id : ObjectId(id)}
+            const review = await reviewCollection.findOne(query);
+            res.send(review);
+         })
 
+
+        //update
+       app.patch('/review/:id',async (req, res) => { 
+            const id = req.params.id;
+            
+             const result = await reviewCollection.updateOne({_id :ObjectId(id)},{$set:req.body});
+           if (result.modifiedCount) {
+               res.send({
+                   success: true,
+                   message:'updated'
+                })
+           } else {
+               res.send({
+                   success: false,
+                   message:'not updated'
+                })
+            }
+
+        })
     }
     
     finally {
