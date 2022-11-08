@@ -58,13 +58,40 @@ async function run() {
         //     res.send(service)
         //  })
 
+          //review api for get
+        app.get('/review', async (req, res) => {
+     
+            let query = {};
+             if (req.query.eamil) {
+                query = {
+                    email:req.query.eamil
+                }
+            }
+            const cursor = reviewCollection.find(query);
+            const review = await cursor.toArray();
+            res.send(review)
+        })
+
       //review  api for post 
-        app.post('/review', async (req, rea) => {
+
+        app.post('/review', async (req, res) => {
             const review = req.body;
             const result = await reviewCollection.insertOne(review);
             res.send(result);
 
        })
+
+
+       //delete
+        
+          app.delete('/review/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await reviewCollection.deleteOne(query);
+            res.send(result);
+        })
+
+        //update
 
     }
     
