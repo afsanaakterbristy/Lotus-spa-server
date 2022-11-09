@@ -49,7 +49,7 @@ async function run() {
           
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
             res.send({ token })
             
         })
@@ -79,12 +79,7 @@ async function run() {
             res.send(service)
         })
         
-        // app.get('/allservices/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query={_id : ObjectId(id)}
-        //     const service = await serviceCollection.findOne(query);
-        //     res.send(service)
-        //  })
+     
 
 
          //service  api for post 
@@ -95,33 +90,44 @@ async function run() {
             res.send(result);
 
        })
-    //     app.post('/allservices', async (req, res) => {
-    //         const services = req.body;
-    //         const result = await serviceCollection.insertOne(services);
-    //         res.send(result);
-
-    //    })
+  
 
 
           //review api 
         app.get('/review',veryfyJWT, async (req, res) => {
      
             const decoded = req.decoded;
+            
            // console.log(decoded.email===req.query.email);
             if (decoded.email !== req.query.email) {
               return  res.status(403).send({message:'unauthorized access'})
             }
+            
+            let query = {email:req.query.email};
+          
+            const cursor = reviewCollection.find(query).sort({ $natural: -1 });
+            const review = await cursor.toArray();
+            res.send(review)
+            console.log(req.query.eamil)
+        })
 
+         app.get('/reviewtwo', async (req, res) => {
+     
+        
             let query = {};
-             if (req.query.eamil) {
+             if (req.query.id) {
                 query = {
-                    email:req.query.eamil
+                    review:req.query.id
                 }
             }
             const cursor = reviewCollection.find(query).sort({ $natural: -1 });
             const review = await cursor.toArray();
             res.send(review)
         })
+
+
+
+
 
       //review  api for post 
 
