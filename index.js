@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const jwt =require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
@@ -16,6 +17,26 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@bri
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 
+//for jwt function
+
+
+function veryfyJWT(req,res,next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+     return  res.status(401).send({message:'unauthorized access'})
+    }
+    const token = authHeader.split(' ')[1];
+   // console.log(token);
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            console.log(err)
+         return res.status(403).send({message:'Forbidden access'})
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
+
 
 async function run() {
     try {
@@ -24,7 +45,14 @@ async function run() {
          const reviewCollection = client.db('serviceSpa').collection('review');
 
         
-      
+      //FOR TOKEN
+          
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+            res.send({ token })
+            
+        })
         
         //data get for 3 services
         app.get('/services', async (req, res) => {
@@ -75,9 +103,15 @@ async function run() {
     //    })
 
 
-          //review api for get
-        app.get('/review', async (req, res) => {
+          //review api 
+        app.get('/review',veryfyJWT, async (req, res) => {
      
+            const decoded = req.decoded;
+           // console.log(decoded.email===req.query.email);
+            if (decoded.email !== req.query.email) {
+              return  res.status(403).send({message:'unauthorized access'})
+            }
+
             let query = {};
              if (req.query.eamil) {
                 query = {
@@ -99,7 +133,7 @@ async function run() {
        })
 
 
-       //delete
+       //delete data
         
           app.delete('/review/:id', async (req, res) => {
             const id = req.params.id;
@@ -108,7 +142,7 @@ async function run() {
             res.send(result);
         })
 
- // update data load
+       // update data load
         app.get('/review/:id', async (req, res) => {
               const id = req.params.id;
             const query={_id : ObjectId(id)}
